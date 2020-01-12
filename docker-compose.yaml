@@ -1,0 +1,38 @@
+version: '3.5'
+services:
+  software:
+    image: grafana/grafana
+    networks:
+      - internal
+#   environment:
+#     - GF_PATHS_CONFIG='/run/secrets/grafana_env'
+    secrets:
+      - source: grafana_env
+        target: /conf/custom.ini 
+#       gid: '0'
+#       uid: '472'
+        mode: 0666
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.backend: "grafana"
+        traefik.docker.network: "internal"
+        traefik.frontend.rule: "Host:grafana.leejonchapman.com"
+        traefik.web.port: "3000"
+        traefik.frontend.headers.SSLRedirect: "true"
+        traefik.frontend.headers.SSLHost: "grafana.leejonchapman.com"
+      placement:
+        constraints:
+          - node.role == worker
+      mode: global
+      restart_policy:
+        condition: any
+        max_attempts: 3
+secrets:
+  grafana_env:
+    file: ./grafana.env
+#   external: true
+networks:
+  internal:
+    name: internal
+    external: true
