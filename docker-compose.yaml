@@ -1,16 +1,22 @@
 version: '3.5'
+volumes:
+  data:
+    driver_opts:
+      type: "nfs"
+      o: "addr=192.168.100.87,nolock,soft,rw"
+      device: ":/mnt/data/grafana"
 services:
   software:
     image: grafana/grafana
     networks:
       - internal
 #   environment:
-#     - GF_PATHS_CONFIG='/run/secrets/grafana_env'
+#     - GF_INSTALL_PLUGINS='grafana-clock-panel,grafana-simple-json-datasource'
+    volumes:
+      - data:/var/lib/grafana
     secrets:
       - source: grafana_env
         target: /conf/custom.ini 
-#       gid: '0'
-#       uid: '472'
         mode: 0666
     deploy:
       labels:
@@ -31,8 +37,10 @@ services:
 secrets:
   grafana_env:
     file: ./grafana.env
-#   external: true
 networks:
   internal:
     name: internal
     external: true
+
+
+
